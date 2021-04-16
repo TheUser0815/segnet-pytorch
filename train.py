@@ -1,5 +1,4 @@
 from modelbuilder import get_default_model
-import matplotlib.pyplot as plt
 import torch
 from dataloader import get_loader, MonochromeDataset as TrainDataset
 import torch.nn as nn
@@ -72,8 +71,8 @@ for epoch in range(epochs):
 
     model.train()
     min_loss, mean_loss = run_dataset(model, train_loader, epoch, True)
-    loss_dict["min_loss"].append(min_loss)
-    loss_dict["mean_loss"].append(mean_loss)
+    loss_dict["min_loss"].append(min_loss.cpu().detach().numpy().item())
+    loss_dict["mean_loss"].append(mean_loss.cpu().detach().numpy().item())
 
     if not epoch % storage_freq:
         torch.save(model.state_dict(), "outputs/epoch_" + str(epoch) + '.pth' )
@@ -85,8 +84,8 @@ for epoch in range(epochs):
         model.eval()
         print("evaluating model")
         val_min_loss, val_mean_loss = run_dataset(model, test_loader, epoch, False)
-        loss_dict["val_min_loss"].append(val_min_loss)
-        loss_dict["val_mean_loss"].append(val_mean_loss)
+        loss_dict["val_min_loss"].append(val_min_loss.cpu().detach().numpy().item())
+        loss_dict["val_mean_loss"].append(val_mean_loss.cpu().detach().numpy().item())
 
     with open("outputs/history.json", "w") as history:
         history.write(json.dumps(loss_dict))
