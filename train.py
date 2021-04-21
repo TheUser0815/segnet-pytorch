@@ -36,7 +36,7 @@ def run_dataset(model, dset, epoch, train):
     min_loss = torch.tensor(1000000000000.).cuda()
     mean_loss = torch.tensor(0.).cuda()
     for i, pack in enumerate(train_loader):
-        imgs, masks = pack
+        imgs, masks, names = pack
         imgs = Variable(imgs).cuda()
         masks = Variable(masks).cuda()
 
