@@ -9,12 +9,22 @@ def haar_wavelet(img):
     approx_even = shallow_approximation[:,:,::2,:]
     approx_odd = shallow_approximation[:,:,1::2,:]
 
-    vertical = approx_even + approx_odd
-    diagonal = approx_even - approx_odd
+    approximation = approx_even + approx_odd
+    vertical = approx_even - approx_odd
 
     detail_even = shallow_details[:,:,::2,:]
     detal_odd = shallow_details[:,:,1::2,:]
 
-    approximation = detail_even + detal_odd
-    horizontal = detail_even - detal_odd
+    horizontal = detail_even + detal_odd
+    diagonal = detail_even - detal_odd
     return torch.stack([approximation, horizontal, vertical, diagonal], 2)[:,0]
+
+def extract_borders(img, pixelvariance=1):
+    img = torch.round(img)
+    left = torch.abs(img - torch.cat([img[:,:,:,:pixelvariance], img], 3)[:,:,:,:-1 * pixelvariance])
+    right = torch.abs(img - torch.cat([img, img[:,:,:,-1 * pixelvariance:]], 3)[:,:,:,pixelvariance:])
+    top = torch.abs(img - torch.cat([img[:,:,:pixelvariance], img], 2)[:,:,:-1 * pixelvariance])
+    bottom = torch.abs(img - torch.cat([img, img[:,:,-1 * pixelvariance:]], 2)[:,:,pixelvariance:])
+    shape = top + left + bottom + right
+    shape[shape > 0.] = 1.
+    return shape
