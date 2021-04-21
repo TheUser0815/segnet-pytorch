@@ -218,7 +218,7 @@ class TrainDataset(DSet):
         self.transformer = transformer_creator(self.transform)
         
         if mask_size is None:
-            self.mask_transformer = self.transformer
+            self.mask_transform = self.transform
         else:
             self.mask_transform = transforms.Compose(
                 transformations + 
@@ -227,7 +227,8 @@ class TrainDataset(DSet):
                     transforms.ToTensor()
                 ]
             )
-            self.mask_transformer = transformer_creator(self.mask_transform)
+            
+        self.mask_transformer = transformer_creator(lambda x: torch.round(self.mask_transform(x)))
         
 
 
