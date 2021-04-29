@@ -33,7 +33,7 @@ class Metric:
         #an alternative tn calculation:
         #self.tn = (1. - mask).sum(dim=2).sum(dim=2) - self.fp
         #using this formula with ThetaMetric and its subclasses the following condition could become true:
-        #tp + tn + fp + fn != |mask elems|
+        #|tp elems| + |tn elems| + |fp elems| + |fn elems| != |mask elems|
         #which could result in metrics above 1
         #that is due to the possibility of different tp amounts in prediction and mask
 
