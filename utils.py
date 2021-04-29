@@ -21,10 +21,14 @@ def haar_wavelet(img):
 
 def extract_borders(img, pixelvariance=1):
     img = torch.round(img)
-    left = torch.abs(img - torch.cat([img[:,:,:,:pixelvariance], img], 3)[:,:,:,:-1 * pixelvariance])
-    right = torch.abs(img - torch.cat([img, img[:,:,:,-1 * pixelvariance:]], 3)[:,:,:,pixelvariance:])
-    top = torch.abs(img - torch.cat([img[:,:,:pixelvariance], img], 2)[:,:,:-1 * pixelvariance])
-    bottom = torch.abs(img - torch.cat([img, img[:,:,-1 * pixelvariance:]], 2)[:,:,pixelvariance:])
+    left = img - torch.cat([img[:,:,:,:pixelvariance], img], 3)[:,:,:,:-1 * pixelvariance]
+    left[left < 0.] = 0.
+    right = img - torch.cat([img, img[:,:,:,-1 * pixelvariance:]], 3)[:,:,:,pixelvariance:]
+    right[right < 0.] = 0.
+    top = img - torch.cat([img[:,:,:pixelvariance], img], 2)[:,:,:-1 * pixelvariance]
+    top[top < 0.] = 0.
+    bottom = img - torch.cat([img, img[:,:,-1 * pixelvariance:]], 2)[:,:,pixelvariance:]
+    bottom[bottom < 0.] = 0.
     shape = top + left + bottom + right
     shape[shape > 0.] = 1.
     return shape
