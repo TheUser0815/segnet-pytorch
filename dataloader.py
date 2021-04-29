@@ -193,7 +193,7 @@ class TrainDataset(DSet):
         if augmentations:
             print('Using RandomRotation, RandomFlip')
             transformations = [
-                transforms.RandomRotation(90, resample=False, expand=False, center=None, fill=None),
+                transforms.RandomRotation(90, interpolation=transforms.functional.InterpolationMode.NEAREST, expand=False, center=None, fill=None),
                 transforms.RandomVerticalFlip(p=0.5),
                 transforms.RandomHorizontalFlip(p=0.5)
             ]
