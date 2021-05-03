@@ -8,6 +8,7 @@ import json
 from utils import haar_wavelet, extract_borders
 from metrics import *
 
+pretrained_path = "/home/dvision/Desktop/Thomas/Networks/pretrained/segnet/border_loss_epoch_99.pth"
 model_classes = 2
 img_classes = 2
 in_channels = 1
@@ -36,6 +37,10 @@ train_loader = get_loader(train_set, batch_size=batch_size)
 test_loader = get_loader(test_set, 1)
 
 model = get_default_model(in_channels, model_classes).cuda()
+
+if pretrained_path is not None:
+    model.load_state_dict(torch.load(pretrained_path))
+
 optimizer = torch.optim.Adam(model.parameters(), learn_rate)
 
 def run_dataset(model, dset, epoch, train):
