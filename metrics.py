@@ -14,8 +14,8 @@ class Metric:
         assert pred.shape == mask.shape, "got pred shape {} instead of mask shape {}".format(pred.shape, mask.shape)
 
         #detach tensors
-        pred = pred.detach().clone().round()
-        mask = mask.detach().clone().round()
+        pred = pred.detach().cpu().clone().round()
+        mask = mask.detach().cpu().clone().round()
 
         self.extract_classification_values(pred, mask)
         
