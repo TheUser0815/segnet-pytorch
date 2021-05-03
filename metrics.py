@@ -1,11 +1,17 @@
 import torch
 import cv2
 
+#the extraction of classification values (tp, tn, fp, fn) is batch elem and channel wise executed
+#it is handeled this way, to enable analysis what impact which channel has
+#in order to achive this .sum(dim=2).sum(dim=2) is often used
+#the first .sum(dim=2) reduces the tensor shape from (b, c, h, w) to (b, c, w)
+#the second .sum(dim=2) reduces the tensor shape from (b, c, w) to (b, c)
+
 class Metric:
     def init(self, pred, mask):
         if pred is None or mask is None:
             return
-        assert pred.shape == mask.shape
+        assert pred.shape == mask.shape, "got pred shape {} instead of mask shape {}".format(pred.shape, mask.shape)
 
         #detach tensors
         pred = pred.detach().clone().round()
