@@ -137,6 +137,9 @@ class DSet(data.Dataset, FileCollector, ImageLoader):
         return image, mask, name
 
     def next(self):
+        if self.index >= self.size:
+            raise StopIteration("out of elements")
+
         image, mask, name = self.getitem(self.index)
 
         self.index += 1
