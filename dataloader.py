@@ -122,13 +122,17 @@ class DSet(data.Dataset, FileCollector, ImageLoader):
             
         return get_mask
 
+    def image_loader(self, img_data, seed):
+        image = self.get_image(os.path.join(self.base_dir, img_data[0], img_data[2]))
+        image = self.transformer(image, seed)
+        return image
+
     def getitem(self, index):
         img_data = self.images[index]
 
         seed = np.random.randint(2147483647) # make a seed with numpy generator 
         
-        image = self.image_loader(os.path.join(self.base_dir, img_data[0], img_data[2]))
-        image = self.transformer(image, seed)
+        image = self.image_loader(img_data, seed)
 
         mask = self.mask_loader(img_data, seed)
 
@@ -166,7 +170,7 @@ class DSet(data.Dataset, FileCollector, ImageLoader):
 
     def copy(self):
         cpy = DSet(self.base_dir, self.img_size, self.class_channels, self.channel_wise_mask)
-        cpy.image_loader = self.image_loader
+        cpy.get_image = self.get_image
         cpy.images = self.images
         cpy.size = self.size
         cpy.mask_transformer = self.mask_transformer
@@ -238,7 +242,7 @@ class TrainDataset(DSet):
 class MonochromeDataset(TrainDataset):
     def __init__(self, base_dir, img_size, augmentations=True, class_channels=1, channel_wise_mask=True, mask_size=None):
         super().__init__(base_dir, img_size, augmentations, class_channels, channel_wise_mask, mask_size)
-        self.image_loader = self.binary_loader
+        self.get_image = self.binary_loader
 
     def __next__(self):
         return self.next()
@@ -257,7 +261,7 @@ class MonochromeDataset(TrainDataset):
 class PolychromeDataset(TrainDataset):
     def __init__(self, base_dir, img_size, augmentations=True, class_channels=1, channel_wise_mask=True, mask_size=None):
         super().__init__(base_dir, img_size, augmentations, class_channels, channel_wise_mask, mask_size)
-        self.image_loader = self.rgb_loader
+        self.get_image = self.rgb_loader
 
     def __next__(self):
         return self.next()
@@ -299,7 +303,7 @@ class TestDataset(DSet):
 class MonochromeTestDataset(TestDataset):
     def __init__(self, base_dir, img_size, class_channels=1, channel_wise_mask=True, mask_size=None):
         super().__init__(base_dir, img_size, class_channels, channel_wise_mask, mask_size)
-        self.image_loader = self.binary_loader
+        self.get_image = self.binary_loader
 
     def __next__(self):
         return self.next()
@@ -318,7 +322,7 @@ class MonochromeTestDataset(TestDataset):
 class PolychromeTestDataset(TestDataset):
     def __init__(self, base_dir, img_size, class_channels=1, channel_wise_mask=True, mask_size=None):
         super().__init__(base_dir, img_size, class_channels, channel_wise_mask, mask_size)
-        self.image_loader = self.rgb_loader
+        self.get_image = self.rgb_loader
 
     def __next__(self):
         return self.next()
