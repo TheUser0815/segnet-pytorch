@@ -8,6 +8,19 @@ import cv2
 #the second .sum(dim=2) reduces the tensor shape from (b, c, w) to (b, c)
 
 class Metric:
+    def __init__(self, use_cuda=False):
+        self.set_device(use_cuda)
+        
+    def set_device(self, use_cuda):
+        if use_cuda:
+            self.use_device = self.use_cuda
+        else:
+            self.use_device = self.use_cpu
+    def use_cuda(self, pred, mask):
+        return pred.cuda(), mask.cuda()
+    def use_cpu(self, pred, mask):
+        return pred.cpu(), mask.cpu()
+
     def init(self, pred, mask):
         if pred is None or mask is None:
             return
@@ -66,8 +79,8 @@ class Metric:
         return (((beta ** 2 + 1) * self.tp) / ((beta ** 2 + 1) * self.tp + (beta ** 2) * self.fn + self.fp)).mean()
 
 class DistanceMetric(Metric):
-    def __init__(self):
-        super().__init__()
+    def __init__(self, use_cuda=False):
+        super().__init__(use_cuda)
     
     def extract_classification_values(self, pred, mask):
         weighted_pred, weighted_mask = self.get_weighted_distances(pred, mask)
@@ -102,8 +115,8 @@ class DistanceMetric(Metric):
         return weighted_pred, weighted_mask
 
 class ThetaMetric(DistanceMetric):
-    def __init__(self, theta):
-        super().__init__()
+    def __init__(self, theta, use_cuda=False):
+        super().__init__(use_cuda)
         self.theta = theta
     def extract_classification_values(self, pred, mask):
         weighted_pred, weighted_mask = self.get_weighted_distances(pred, mask)
@@ -125,8 +138,8 @@ class ThetaMetric(DistanceMetric):
         return weighted_pred, weighted_mask, fp_mask, fn_mask
 
 class DistanceThetaMetric(ThetaMetric):
-    def __init__(self, theta):
-        super().__init__(theta)
+    def __init__(self, theta, use_cuda=False):
+        super().__init__(theta, use_cuda)
     def extract_classification_values(self, pred, mask):
         theta = self.theta
 
@@ -139,10 +152,12 @@ class DistanceThetaMetric(ThetaMetric):
         self.fn = (weighted_mask * fn_mask - theta * fn_mask).sum(dim=2).sum(dim=2)
 
 class BorderMetric(Metric):
-    def __init__(self, border_extractor, border_thicness=1, metric_object=None):
+    def __init__(self, border_extractor, border_thicness=1, metric_object=None, use_cuda=False):
+        super().__init__(use_cuda)
         if metric_object is not None:
             self.metric_object = metric_object
             self.super_extractor = self.metric_object.get_classification_values
+            self.metric_object.set_device(use_cuda)
         else:
             self.super_extractor = self.get_classification_values
         self.border_extractor = border_extractor
